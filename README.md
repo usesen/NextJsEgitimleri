@@ -60,7 +60,6 @@ my-advanced-nextjs-app/
 └── tsconfig.json             # TypeScript konfigürasyon dosyası (TypeScript kullanılıyorsa)
 
 ```
-Next.js Advanced Eğitim Dökümanı: Ders Başlıkları
 Next.js Mimarisi ve Render Yöntemleri
 Server-Side Rendering (SSR) ve Static Site Generation (SSG)
 Dinamik Rotalama ve Gelişmiş Yönlendirme
