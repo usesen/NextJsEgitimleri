@@ -61,22 +61,41 @@ my-advanced-nextjs-app/
 
 ```
 Next.js Mimarisi ve Render Yöntemleri
+
 Server-Side Rendering (SSR) ve Static Site Generation (SSG)
+
 Dinamik Rotalama ve Gelişmiş Yönlendirme
+
 API Routes ve Backend Entegrasyonu
+
 Performans Optimizasyonu
+
 SEO ve Metadata Yönetimi
+
 Çevresel Değişkenler ve Güvenlik
+
 Veritabanı Entegrasyonu (Prisma ORM)
+
 Authentication ve Authorization
+
 Global State Yönetimi (Redux, Context API)
+
 TypeScript ile Next.js Kullanımı
+
 Middleware ve Route Yönetimi
+
 Serverless API Geliştirme
+
 CI/CD Pipeline Kurulumu
+
 Test Driven Development (TDD) ve Test Stratejileri
+
 PWA ve Offline Desteği
+
 Çoklu Dil Desteği (i18n)
+
 Mikroservis Mimarisi ile Next.js
+
 WebSockets ile Gerçek Zamanlı Uygulamalar
+
 Monorepo ve Çoklu Proje Yönetimi
