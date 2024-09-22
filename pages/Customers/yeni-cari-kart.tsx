@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import ReactPaginate from 'react-paginate';
 import styles from '../../styles/YeniCariKart.module.css';
-import { FaSearch, FaPlus, FaEye, FaEdit, FaTrash, FaBuilding, FaCity, FaUser } from 'react-icons/fa';
+import {
+  FaSearch,
+  FaPlus,
+  FaEye,
+  FaEdit,
+  FaTrash,
+  FaBuilding,
+  FaCity,
+  FaUser,
+} from 'react-icons/fa';
 
 interface Customer {
   id: number;
@@ -27,7 +36,9 @@ const YeniCariKart: React.FC = () => {
     return Array.from({ length: count }, (_, index) => ({
       id: index + 1,
       unvan: `Şirket ${index + 1}`,
-      sehir: ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya'][Math.floor(Math.random() * 5)],
+      sehir: ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya'][
+        Math.floor(Math.random() * 5)
+      ],
       yetkili: `Yetkili ${index + 1}`,
       borc: Math.floor(Math.random() * 10000),
       alacak: Math.floor(Math.random() * 10000),
@@ -47,14 +58,21 @@ const YeniCariKart: React.FC = () => {
     setCurrentPage(event.selected);
   };
 
-  const handleCustomersPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCustomersPerPageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setCustomersPerPage(Number(event.target.value));
     setCurrentPage(0); // Sayfa sayısı değiştiğinde ilk sayfaya dön
   };
 
   const handleSearch = () => {
-    // Arama işlemi burada gerçekleştirilecek
-    console.log('Arama yapılıyor:', { searchUnvan, searchSehir, searchYetkili });
+    const filteredCustomers = customers.filter(customer => 
+      customer.unvan.toLowerCase().includes(searchUnvan.toLowerCase()) &&
+      customer.sehir.toLowerCase().includes(searchSehir.toLowerCase()) &&
+      customer.yetkili.toLowerCase().includes(searchYetkili.toLowerCase())
+    );
+    setCustomers(filteredCustomers);
+    setCurrentPage(0); // Arama sonrası ilk sayfaya dön
   };
 
   const handleNewRecord = () => {
@@ -72,31 +90,31 @@ const YeniCariKart: React.FC = () => {
         <div className={styles.inputWrapper}>
           <FaBuilding className={styles.inputIcon} />
           <input
-            type='text'
-            placeholder='Ünvan'
-            className={styles.searchInput}
+            type="text"
+            placeholder="Ünvan Ara..."
             value={searchUnvan}
             onChange={(e) => setSearchUnvan(e.target.value)}
+            className={styles.searchInput}
           />
         </div>
         <div className={styles.inputWrapper}>
           <FaCity className={styles.inputIcon} />
           <input
-            type='text'
-            placeholder='Şehir'
-            className={styles.searchInput}
+            type="text"
+            placeholder="Şehir Ara..."
             value={searchSehir}
             onChange={(e) => setSearchSehir(e.target.value)}
+            className={styles.searchInput}
           />
         </div>
         <div className={styles.inputWrapper}>
           <FaUser className={styles.inputIcon} />
           <input
-            type='text'
-            placeholder='Yetkili'
-            className={styles.searchInput}
+            type="text"
+            placeholder="Yetkili Ara..."
             value={searchYetkili}
             onChange={(e) => setSearchYetkili(e.target.value)}
+            className={styles.searchInput}
           />
         </div>
         <button className={styles.searchButton} onClick={handleSearch}>
@@ -105,6 +123,16 @@ const YeniCariKart: React.FC = () => {
         <button className={styles.newRecordButton} onClick={handleNewRecord}>
           <FaPlus /> Yeni Kayıt
         </button>
+        <select
+          id='customersPerPage'
+          value={customersPerPage}
+          onChange={handleCustomersPerPageChange}
+          className={styles.customersPerPageSelect}
+        >
+          <option value='5'>5</option>
+          <option value='10'>10</option>
+          <option value='20'>20</option>
+        </select>
       </div>
       <div className={styles.tableContainer}>
         <table className={styles.table}>
@@ -151,18 +179,6 @@ const YeniCariKart: React.FC = () => {
         </table>
       </div>
       <div className={styles.tableFooter}>
-        <div className={styles.tableOptions}>
-          <label htmlFor="customersPerPage" className={styles.selectLabel}>Gösterilecek müşteri sayısı:</label>
-          <select
-            id="customersPerPage"
-            value={customersPerPage}
-            onChange={handleCustomersPerPageChange}
-          >
-            <option value='5'>5</option>
-            <option value='10'>10</option>
-            <option value='20'>20</option>
-          </select>
-        </div>
         <ReactPaginate
           previousLabel={'Önceki'}
           nextLabel={'Sonraki'}
