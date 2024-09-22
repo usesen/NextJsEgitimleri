@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReactPaginate from 'react-paginate';
 import styles from '../../styles/YeniCariKart.module.css';
 import {
@@ -10,6 +10,9 @@ import {
   FaBuilding,
   FaCity,
   FaUser,
+  FaSort,
+  FaSortUp,
+  FaSortDown
 } from 'react-icons/fa';
 
 interface Customer {
@@ -23,6 +26,9 @@ interface Customer {
   bakiyeAlacak: number;
 }
 
+type SortField = 'id' | 'unvan' | 'sehir' | 'yetkili' | 'borc' | 'alacak' | 'bakiyeBorc' | 'bakiyeAlacak';
+type SortOrder = 'asc' | 'desc';
+
 const YeniCariKart: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -30,20 +36,59 @@ const YeniCariKart: React.FC = () => {
   const [searchUnvan, setSearchUnvan] = useState('');
   const [searchSehir, setSearchSehir] = useState('');
   const [searchYetkili, setSearchYetkili] = useState('');
+  const [sortField, setSortField] = useState<SortField>('id');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
-  // Daha fazla veri oluşturmak için bir fonksiyon
+  // Filtrelenmiş müşterileri hesapla
+  const filteredCustomers = useMemo(() => {
+    return customers.filter(customer =>
+      customer.unvan.toLowerCase().includes(searchUnvan.toLowerCase()) &&
+      customer.sehir.toLowerCase().includes(searchSehir.toLowerCase()) &&
+      customer.yetkili.toLowerCase().includes(searchYetkili.toLowerCase())
+    );
+  }, [customers, searchUnvan, searchSehir, searchYetkili]);
+
+  // Filtrelenmiş ve sıralanmış müşterileri hesapla
+  const sortedAndFilteredCustomers = useMemo(() => {
+    return filteredCustomers.sort((a, b) => {
+      if (a[sortField] < b[sortField]) return sortOrder === 'asc' ? -1 : 1;
+      if (a[sortField] > b[sortField]) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [filteredCustomers, sortField, sortOrder]);
+
+  const sirketUnvanlari = [
+    "Anadolu Ticaret A.Ş.", "Yıldız Lojistik Ltd. Şti.", "Mavi Deniz Turizm ve Otelcilik",
+    "Yeşil Vadi Tarım Ürünleri", "Güneş Enerji Sistemleri A.Ş.", "Akıllı Teknoloji Çözümleri",
+    "Doğa Dostu Tekstil San. Tic. Ltd.", "Mega Yapı Malzemeleri A.Ş.", "Sağlıklı Yaşam Gıda Ltd. Şti.",
+    "Hızlı Kargo Dağıtım Hizmetleri", "Parlak Gelecek Eğitim Kurumları", "Güvenli Adım Sigorta A.Ş.",
+    "Yeşil Çevre Geri Dönüşüm Ltd.", "Mutlu Patiler Veteriner Kliniği", "Tatlı Rüyalar Mobilya San.",
+    "Dijital Dünya Bilişim Hizmetleri", "Lezzet Durağı Restoran İşletmeleri", "Renkli Düşler Oyuncak Ltd.",
+    "Temiz Enerji Çözümleri A.Ş.", "Güçlü Makine Sanayi ve Ticaret"
+  ];
+
+  const yetkililer = [
+    "Ahmet Yılmaz", "Ayşe Kaya", "Mehmet Demir", "Fatma Çelik", "Ali Öztürk",
+    "Zeynep Aydın", "Mustafa Şahin", "Emine Yıldız", "Hasan Kara", "Hatice Aksoy",
+    "İbrahim Arslan", "Elif Güneş", "Osman Koç", "Merve Özdemir", "Hüseyin Çetin",
+    "Esra Yalçın", "Murat Erdoğan", "Selin Doğan", "Emre Avcı", "Gizem Korkmaz"
+  ];
+
+  const sehirler = [
+    "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Adana", "Konya", "Gaziantep",
+    "Şanlıurfa", "Kocaeli", "Mersin", "Diyarbakır", "Hatay", "Manisa", "Kayseri"
+  ];
+
   const createFakeData = (count: number): Customer[] => {
     return Array.from({ length: count }, (_, index) => ({
       id: index + 1,
-      unvan: `Şirket ${index + 1}`,
-      sehir: ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya'][
-        Math.floor(Math.random() * 5)
-      ],
-      yetkili: `Yetkili ${index + 1}`,
-      borc: Math.floor(Math.random() * 10000),
-      alacak: Math.floor(Math.random() * 10000),
-      bakiyeBorc: Math.floor(Math.random() * 5000),
-      bakiyeAlacak: Math.floor(Math.random() * 5000),
+      unvan: sirketUnvanlari[Math.floor(Math.random() * sirketUnvanlari.length)],
+      sehir: sehirler[Math.floor(Math.random() * sehirler.length)],
+      yetkili: yetkililer[Math.floor(Math.random() * yetkililer.length)],
+      borc: Math.floor(Math.random() * 1000000) / 100,
+      alacak: Math.floor(Math.random() * 1000000) / 100,
+      bakiyeBorc: Math.floor(Math.random() * 500000) / 100,
+      bakiyeAlacak: Math.floor(Math.random() * 500000) / 100,
     }));
   };
 
@@ -52,7 +97,7 @@ const YeniCariKart: React.FC = () => {
     setCustomers(createFakeData(100));
   }, []);
 
-  const pageCount = Math.ceil(customers.length / customersPerPage);
+  const pageCount = Math.ceil(filteredCustomers.length / customersPerPage);
 
   const handlePageClick = (event: { selected: number }) => {
     setCurrentPage(event.selected);
@@ -81,7 +126,44 @@ const YeniCariKart: React.FC = () => {
   };
 
   const offset = currentPage * customersPerPage;
-  const currentCustomers = customers.slice(offset, offset + customersPerPage);
+  const currentCustomers = sortedAndFilteredCustomers.slice(offset, offset + customersPerPage);
+
+  const formatNumber = (amount: number) => {
+    return new Intl.NumberFormat('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  // Arama input'ları için onChange handler'ları
+  const handleUnvanSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchUnvan(e.target.value);
+    setCurrentPage(0);
+  };
+
+  const handleSehirSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchSehir(e.target.value);
+    setCurrentPage(0);
+  };
+
+  const handleYetkiliSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchYetkili(e.target.value);
+    setCurrentPage(0);
+  };
+
+  const handleSort = (field: SortField) => {
+    if (field === sortField) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (field !== sortField) return <FaSort />;
+    return sortOrder === 'asc' ? <FaSortUp /> : <FaSortDown />;
+  };
 
   return (
     <div className={styles.container}>
@@ -93,7 +175,7 @@ const YeniCariKart: React.FC = () => {
             type="text"
             placeholder="Ünvan Ara..."
             value={searchUnvan}
-            onChange={(e) => setSearchUnvan(e.target.value)}
+            onChange={handleUnvanSearch}
             className={styles.searchInput}
           />
         </div>
@@ -103,7 +185,7 @@ const YeniCariKart: React.FC = () => {
             type="text"
             placeholder="Şehir Ara..."
             value={searchSehir}
-            onChange={(e) => setSearchSehir(e.target.value)}
+            onChange={handleSehirSearch}
             className={styles.searchInput}
           />
         </div>
@@ -113,7 +195,7 @@ const YeniCariKart: React.FC = () => {
             type="text"
             placeholder="Yetkili Ara..."
             value={searchYetkili}
-            onChange={(e) => setSearchYetkili(e.target.value)}
+            onChange={handleYetkiliSearch}
             className={styles.searchInput}
           />
         </div>
@@ -138,14 +220,30 @@ const YeniCariKart: React.FC = () => {
         <table className={styles.table}>
           <thead>
             <tr className={styles.tableHeader}>
-              <th className={styles.tableCell}>ID</th>
-              <th className={styles.tableCell}>Ünvan</th>
-              <th className={styles.tableCell}>Şehir</th>
-              <th className={styles.tableCell}>Yetkili</th>
-              <th className={styles.tableCell}>Borç</th>
-              <th className={styles.tableCell}>Alacak</th>
-              <th className={styles.tableCell}>Bakiye Borç</th>
-              <th className={styles.tableCell}>Bakiye Alacak</th>
+              <th className={styles.tableCell} onClick={() => handleSort('id')}>
+                ID <SortIcon field="id" />
+              </th>
+              <th className={styles.tableCell} onClick={() => handleSort('unvan')}>
+                Ünvan <SortIcon field="unvan" />
+              </th>
+              <th className={styles.tableCell} onClick={() => handleSort('sehir')}>
+                Şehir <SortIcon field="sehir" />
+              </th>
+              <th className={styles.tableCell} onClick={() => handleSort('yetkili')}>
+                Yetkili <SortIcon field="yetkili" />
+              </th>
+              <th className={styles.tableCell} onClick={() => handleSort('borc')}>
+                Borç <SortIcon field="borc" />
+              </th>
+              <th className={styles.tableCell} onClick={() => handleSort('alacak')}>
+                Alacak <SortIcon field="alacak" />
+              </th>
+              <th className={styles.tableCell} onClick={() => handleSort('bakiyeBorc')}>
+                Bakiye Borç <SortIcon field="bakiyeBorc" />
+              </th>
+              <th className={styles.tableCell} onClick={() => handleSort('bakiyeAlacak')}>
+                Bakiye Alacak <SortIcon field="bakiyeAlacak" />
+              </th>
               <th className={`${styles.tableCell} ${styles.actionsCell}`}>
                 İşlemler
               </th>
@@ -158,10 +256,10 @@ const YeniCariKart: React.FC = () => {
                 <td className={styles.tableCell}>{customer.unvan}</td>
                 <td className={styles.tableCell}>{customer.sehir}</td>
                 <td className={styles.tableCell}>{customer.yetkili}</td>
-                <td className={styles.tableCell}>{customer.borc}</td>
-                <td className={styles.tableCell}>{customer.alacak}</td>
-                <td className={styles.tableCell}>{customer.bakiyeBorc}</td>
-                <td className={styles.tableCell}>{customer.bakiyeAlacak}</td>
+                <td className={styles.tableCell}>{formatNumber(customer.borc)}</td>
+                <td className={styles.tableCell}>{formatNumber(customer.alacak)}</td>
+                <td className={styles.tableCell}>{formatNumber(customer.bakiyeBorc)}</td>
+                <td className={styles.tableCell}>{formatNumber(customer.bakiyeAlacak)}</td>
                 <td className={`${styles.tableCell} ${styles.actionsCell}`}>
                   <button className={`${styles.button} ${styles.buttonBlue}`}>
                     <FaEye /> Göster

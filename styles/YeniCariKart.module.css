@@ -10,18 +10,15 @@
 }
 
 .tableContainer {
-  display: flex;
-  justify-content: center;
   overflow-x: auto;
-  padding: 0 5rem;
-  margin: 0;
-  width: 100%; /* Eklendi */
+  width: 100%;
+  padding: 0 1rem;
 }
 
 .table {
+  width: 100%;
   border-collapse: collapse;
-  width: 100%; /* Eklendi */
-  min-width: 800px; /* Eklendi, gerekirse ayarlayın */
+  min-width: 800px;
 }
 
 .tableHeader {
@@ -29,21 +26,47 @@
 }
 
 .tableCell {
-  border: 1px solid #d1d5db;
-  padding: 0.5rem;
-  white-space: nowrap; /* Eklendi */
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.tableHeader .tableCell {
+  font-weight: bold;
+  border-top: 1px solid #ddd;
+}
+
+.tableCell:last-child {
+  border-right: none;
+}
+
+.actionsCell {
+  width: 180px;
+  white-space: nowrap;
+}
+
+/* Diğer sütunlar için minimum genişlik ayarla */
+.tableCell:not(.actionsCell) {
+  min-width: 100px;
+}
+
+/* Ünvan sütunu için özel genişlik */
+.tableCell:nth-child(2) {
+  width: 20%;
 }
 
 .button {
-  display: inline-flex; /* inline-flex olarak değiştirdik */
+  display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  padding: 5px 8px;
+  margin: 0 2px;
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
-  font-size: 0.875rem;
-  margin-right: 0.25rem;
+  font-size: 12px;
+  font-weight: bold;
 }
 
 .buttonBlue {
@@ -63,7 +86,7 @@
 
 .searchContainer {
   margin-top: 2rem;
-  margin-bottom: 1rem; /* Değeri azalttık */
+  margin-bottom: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,8 +124,8 @@
 }
 
 .actionsCell {
-  min-width: 240px; /* veya ihtiyacınıza göre ayarlayın */
-  white-space: nowrap; /* Eklendi */
+  width: 180px;
+  white-space: nowrap;
 }
 
 .tableHeader th {
@@ -177,7 +200,7 @@
 
 .table th,
 .table td {
-  min-width: 100px; /* veya ihtiyacınıza göre ayarlayın */
+  min-width: 100px;
 }
 
 .customersPerPageSelect {
@@ -199,4 +222,41 @@
 .customersPerPageSelect:focus {
   border-color: #0056b3;
   box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.25);
+}
+
+@media screen and (max-width: 768px) {
+  .tableContainer {
+    padding: 0 0.5rem;
+  }
+
+  .table {
+    font-size: 14px;
+  }
+
+  .tableCell {
+    padding: 8px 5px;
+  }
+
+  /* Mobil cihazlarda bazı sütunları gizle */
+  .tableCell:nth-child(3),
+  .tableCell:nth-child(4),
+  .tableCell:nth-child(5) {
+    display: none;
+  }
+
+  .actionsCell {
+    width: auto;
+    white-space: normal;
+  }
+
+  .button {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  /* Ünvan sütunu genişliğini mobil için ayarla */
+  .tableCell:nth-child(2) {
+    width: 40%;
+  }
 }
