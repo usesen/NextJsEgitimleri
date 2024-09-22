@@ -1,0 +1,171 @@
+.container {
+  padding: 1rem 0;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.tableContainer {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  padding: 0;
+  margin: 0;
+}
+
+.table {
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  background-color: #f3f4f6;
+}
+
+.tableCell {
+  border: 1px solid #d1d5db;
+  padding: 0.5rem;
+}
+
+.button {
+  display: inline-flex; /* inline-flex olarak değiştirdik */
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  margin-right: 0.25rem;
+}
+
+.buttonBlue {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.buttonGreen {
+  background-color: #10b981;
+  color: white;
+}
+
+.buttonRed {
+  background-color: #ef4444;
+  color: white;
+}
+
+.searchContainer {
+  margin-top: 2rem;
+  margin-bottom: 1rem; /* Değeri azalttık */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  padding: 0.5rem 0.5rem 0.5rem 2rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+}
+
+.searchButton,
+.newRecordButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.searchButton {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.newRecordButton {
+  background-color: #10b981;
+  color: white;
+}
+
+.actionsCell {
+  min-width: 240px; /* veya ihtiyacınıza göre ayarlayın */
+}
+
+.tableHeader th {
+  font-weight: bold;
+  background-color: #f3f4f6;
+  text-align: left;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 10px;
+  color: #6b7280;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  list-style-type: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.paginationButton {
+  margin: 0 0.25rem;
+}
+
+.paginationButton a {
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  color: #374151;
+  text-decoration: none;
+}
+
+.paginationButton:hover a {
+  background-color: #e5e7eb;
+}
+
+.active a {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.disabled a {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 0.875rem;
+  margin: 0 1rem;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.tableOptions {
+  margin-left: 20px;
+}

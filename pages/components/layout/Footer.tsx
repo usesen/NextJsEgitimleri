@@ -6,7 +6,7 @@ const Footer = () => {
       <div className='container'>
         <div className='row'>
           <div className='col-md-6'>
-            <p>&copy; 2024 Şirket Adı. Tüm hakları saklıdır.</p>
+            <p>&copy; 2024Nextjs Uğur Şeşen. Tüm hakları saklıdır.</p>
           </div>
           <div className='col-md-6 text-md-end'>
             <a href='#' className='text-muted me-2'>

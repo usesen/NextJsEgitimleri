@@ -26,7 +26,7 @@ const CustomersHome = () => {
             <div className='card-body'>
               <h5 className='card-title'>Yeni Müşteri Ekle</h5>
               <p className='card-text'>Sisteme yeni bir müşteri ekleyin.</p>
-              <Link href='/customers/add' className='btn btn-success'>
+              <Link href='/customers/yeni-cari-kart' className='btn btn-success'>
                 Yeni Müşteri Ekle
               </Link>
             </div>
