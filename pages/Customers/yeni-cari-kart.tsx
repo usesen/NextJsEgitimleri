@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactPaginate from 'react-paginate';
 import styles from '../../styles/YeniCariKart.module.css';
+import { Table, Button, Form, Row, Col, InputGroup, Modal } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import ModalForm from './FormData';
+import CariRecord from '../models/CariRecordModel';
+import { getData, handleDeleteData} from './services/customerservice'; // Servis dosyanızdan getData fonksiyonunu içe aktarıyoruz.
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Toastify stillerini dahil etmeyi unutma
+import ConfirmDeleteModal from './services/ConfirmDeleteModal';
+
 import {
   FaSearch,
   FaPlus,
@@ -12,25 +21,16 @@ import {
   FaUser,
   FaSort,
   FaSortUp,
-  FaSortDown
+  FaSortDown,
 } from 'react-icons/fa';
 
-interface Customer {
-  id: number;
-  unvan: string;
-  sehir: string;
-  yetkili: string;
-  borc: number;
-  alacak: number;
-  bakiyeBorc: number;
-  bakiyeAlacak: number;
-}
-
-type SortField = 'id' | 'unvan' | 'sehir' | 'yetkili' | 'borc' | 'alacak' | 'bakiyeBorc' | 'bakiyeAlacak';
+type SortField = 'id' | 'company' | 'city' | 'firstName' | 'debt' | 'credit' | 'balanceDebt' | 'balanceCredit';
 type SortOrder = 'asc' | 'desc';
 
 const YeniCariKart: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<CariRecord | null>(null);
+  const [customers, setCustomers] = useState<CariRecord[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [customersPerPage, setCustomersPerPage] = useState(10);
   const [searchUnvan, setSearchUnvan] = useState('');
@@ -38,13 +38,34 @@ const YeniCariKart: React.FC = () => {
   const [searchYetkili, setSearchYetkili] = useState('');
   const [sortField, setSortField] = useState<SortField>('id');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
-
+  const [showModal, setShowModal] = useState(false);
+  const [currentRecord, setCurrentRecord] = useState<CariRecord>({
+    id: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    country: '',
+    postalCode: '',
+    company: '',
+    position: '',
+    notes: '',
+    debt: 0,
+    credit: 0,
+    balanceDebt: 0,
+    balanceCredit: 0,
+  });
+ 
+  const [modalMode, setModalMode] = useState<'new' | 'edit' | 'view'>('new');
   // Filtrelenmiş müşterileri hesapla
   const filteredCustomers = useMemo(() => {
-    return customers.filter(customer =>
-      customer.unvan.toLowerCase().includes(searchUnvan.toLowerCase()) &&
-      customer.sehir.toLowerCase().includes(searchSehir.toLowerCase()) &&
-      customer.yetkili.toLowerCase().includes(searchYetkili.toLowerCase())
+    return customers.filter(
+      (customer: CariRecord) =>
+        customer.company.toLowerCase().includes(searchUnvan.toLowerCase()) &&
+        customer.city.toLowerCase().includes(searchSehir.toLowerCase()) &&
+        customer.firstName.toLowerCase().includes(searchYetkili.toLowerCase())
     );
   }, [customers, searchUnvan, searchSehir, searchYetkili]);
 
@@ -57,45 +78,7 @@ const YeniCariKart: React.FC = () => {
     });
   }, [filteredCustomers, sortField, sortOrder]);
 
-  const sirketUnvanlari = [
-    "Anadolu Ticaret A.Ş.", "Yıldız Lojistik Ltd. Şti.", "Mavi Deniz Turizm ve Otelcilik",
-    "Yeşil Vadi Tarım Ürünleri", "Güneş Enerji Sistemleri A.Ş.", "Akıllı Teknoloji Çözümleri",
-    "Doğa Dostu Tekstil San. Tic. Ltd.", "Mega Yapı Malzemeleri A.Ş.", "Sağlıklı Yaşam Gıda Ltd. Şti.",
-    "Hızlı Kargo Dağıtım Hizmetleri", "Parlak Gelecek Eğitim Kurumları", "Güvenli Adım Sigorta A.Ş.",
-    "Yeşil Çevre Geri Dönüşüm Ltd.", "Mutlu Patiler Veteriner Kliniği", "Tatlı Rüyalar Mobilya San.",
-    "Dijital Dünya Bilişim Hizmetleri", "Lezzet Durağı Restoran İşletmeleri", "Renkli Düşler Oyuncak Ltd.",
-    "Temiz Enerji Çözümleri A.Ş.", "Güçlü Makine Sanayi ve Ticaret"
-  ];
-
-  const yetkililer = [
-    "Ahmet Yılmaz", "Ayşe Kaya", "Mehmet Demir", "Fatma Çelik", "Ali Öztürk",
-    "Zeynep Aydın", "Mustafa Şahin", "Emine Yıldız", "Hasan Kara", "Hatice Aksoy",
-    "İbrahim Arslan", "Elif Güneş", "Osman Koç", "Merve Özdemir", "Hüseyin Çetin",
-    "Esra Yalçın", "Murat Erdoğan", "Selin Doğan", "Emre Avcı", "Gizem Korkmaz"
-  ];
-
-  const sehirler = [
-    "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Adana", "Konya", "Gaziantep",
-    "Şanlıurfa", "Kocaeli", "Mersin", "Diyarbakır", "Hatay", "Manisa", "Kayseri"
-  ];
-
-  const createFakeData = (count: number): Customer[] => {
-    return Array.from({ length: count }, (_, index) => ({
-      id: index + 1,
-      unvan: sirketUnvanlari[Math.floor(Math.random() * sirketUnvanlari.length)],
-      sehir: sehirler[Math.floor(Math.random() * sehirler.length)],
-      yetkili: yetkililer[Math.floor(Math.random() * yetkililer.length)],
-      borc: Math.floor(Math.random() * 1000000) / 100,
-      alacak: Math.floor(Math.random() * 1000000) / 100,
-      bakiyeBorc: Math.floor(Math.random() * 500000) / 100,
-      bakiyeAlacak: Math.floor(Math.random() * 500000) / 100,
-    }));
-  };
-
-  useEffect(() => {
-    // Komponentin yüklendiğinde 100 adet sahte veri oluştur
-    setCustomers(createFakeData(100));
-  }, []);
+  const handleClose = () => setShowModal(false); // Modalı kapatma fonksiyonu
 
   const pageCount = Math.ceil(filteredCustomers.length / customersPerPage);
 
@@ -111,27 +94,43 @@ const YeniCariKart: React.FC = () => {
   };
 
   const handleSearch = () => {
-    const filteredCustomers = customers.filter(customer => 
-      customer.unvan.toLowerCase().includes(searchUnvan.toLowerCase()) &&
-      customer.sehir.toLowerCase().includes(searchSehir.toLowerCase()) &&
-      customer.yetkili.toLowerCase().includes(searchYetkili.toLowerCase())
-    );
-    setCustomers(filteredCustomers);
     setCurrentPage(0); // Arama sonrası ilk sayfaya dön
   };
 
-  const handleNewRecord = () => {
-    // Yeni kayıt ekleme işlemi burada gerçekleştirilecek
-    console.log('Yeni kayıt ekleniyor');
-  };
+const handleNewRecord = () => {
+  // Yeni kayıt için currentRecord'u sıfırla
+  setCurrentRecord({
+    id: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    country: '',
+    postalCode: '',
+    company: '',
+    position: '',
+    notes: '',
+    debt: 0,
+    credit: 0,
+    balanceDebt: 0,
+    balanceCredit: 0,
+  });
+  setModalMode('new'); 
+  setShowModal(true); // Yeni kayıt için modalı aç
+};
 
   const offset = currentPage * customersPerPage;
-  const currentCustomers = sortedAndFilteredCustomers.slice(offset, offset + customersPerPage);
+  const currentCustomers = sortedAndFilteredCustomers.slice(
+    offset,
+    offset + customersPerPage
+  );
 
   const formatNumber = (amount: number) => {
     return new Intl.NumberFormat('tr-TR', {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
@@ -165,6 +164,86 @@ const YeniCariKart: React.FC = () => {
     return sortOrder === 'asc' ? <FaSortUp /> : <FaSortDown />;
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getData(); // API isteğini başlatıyoruz
+        setCustomers(data); // Gelen verileri state'e atıyoruz
+      } catch (error) {
+        console.error('Veri çekme hatası:', error);
+      }
+    };
+
+    fetchData(); // Component mount edildiğinde veri çekiyoruz
+  }, []); // Boş bağımlılık dizisi, bu useEffect'in sadece component mount edildiğinde çalışmasını sağlar.
+  const handleShow = (record: CariRecord, mode: 'view' | 'edit' | 'new' ) => {
+    setCurrentRecord(record); // Burada tıklanan kaydı ayarlıyoruz
+    setModalMode(mode); // Modu ayarla (view veya edit)
+    setShowModal(true);
+  };
+  const openDeleteModal = (record :CariRecord) => {
+    console.log("modal açıldı id nin gelmesi lazım :" , record.id);
+    setRecordToDelete(record);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setRecordToDelete(null);
+  };
+
+const handleDeleteConfirm = () => {
+  if (recordToDelete) {
+    console.log(
+      'handleDeleteConfirm Deleting record',
+      recordToDelete.id.toString
+    );
+    handleDelete(recordToDelete.id.toString());
+  }
+  closeDeleteModal(); // Modal'ı kapatmayı unutmayın
+};
+
+const handleDelete = async (id: string) => {
+  try {
+    console.log('handleDelete Deleting record', id);
+    const response = await handleDeleteData(id);
+
+    console.log('Delete response:', response); // Yanıtı konsola yazdırıyoruz
+
+    // HTTP 204 No Content yanıtı için response boş olacak
+    if (response === null || response === undefined) {
+      toast.success('Kayıt başarıyla silindi.');
+      // Silme işlemi başarılı olursa tabloyu güncelliyoruz
+      setCustomers((prevCustomers) =>
+        prevCustomers.filter((customer) => customer.id !== id)
+      );
+    } else {
+      // Beklenmeyen bir yanıt alındıysa
+      toast.error('Kayıt silinirken beklenmeyen bir yanıt alındı.');
+      console.error('Unexpected delete response:', response);
+    }
+  } catch (error) {
+    console.error('Silme hatası:', error);
+    toast.error('Kayıt silinirken bir hata oluştu.');
+  }
+};
+
+ const handleFormChange = (updatedData: CariRecord) => {
+   setCurrentRecord(updatedData);
+ };
+
+ const handleFormSubmit = async () => {
+   try {
+     // API'ye veri gönderme işlemi
+     // await updateCustomer(currentRecord);
+     handleClose();
+     // Başarılı güncelleme mesajı göster
+   } catch (error) {
+     console.error('Güncelleme hatası:', error);
+     // Hata mesajı göster
+   }
+ };
+ 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Yeni Cari Kart</h1>
@@ -172,8 +251,8 @@ const YeniCariKart: React.FC = () => {
         <div className={styles.inputWrapper}>
           <FaBuilding className={styles.inputIcon} />
           <input
-            type="text"
-            placeholder="Ünvan Ara..."
+            type='text'
+            placeholder='Ünvan Ara...'
             value={searchUnvan}
             onChange={handleUnvanSearch}
             className={styles.searchInput}
@@ -182,8 +261,8 @@ const YeniCariKart: React.FC = () => {
         <div className={styles.inputWrapper}>
           <FaCity className={styles.inputIcon} />
           <input
-            type="text"
-            placeholder="Şehir Ara..."
+            type='text'
+            placeholder='Şehir Ara...'
             value={searchSehir}
             onChange={handleSehirSearch}
             className={styles.searchInput}
@@ -192,8 +271,8 @@ const YeniCariKart: React.FC = () => {
         <div className={styles.inputWrapper}>
           <FaUser className={styles.inputIcon} />
           <input
-            type="text"
-            placeholder="Yetkili Ara..."
+            type='text'
+            placeholder='Yetkili Ara...'
             value={searchYetkili}
             onChange={handleYetkiliSearch}
             className={styles.searchInput}
@@ -221,28 +300,49 @@ const YeniCariKart: React.FC = () => {
           <thead>
             <tr className={styles.tableHeader}>
               <th className={styles.tableCell} onClick={() => handleSort('id')}>
-                ID <SortIcon field="id" />
+                ID <SortIcon field='id' />
               </th>
-              <th className={styles.tableCell} onClick={() => handleSort('unvan')}>
-                Ünvan <SortIcon field="unvan" />
+              <th
+                className={styles.tableCell}
+                onClick={() => handleSort('company')}
+              >
+                Ünvan <SortIcon field='company' />
               </th>
-              <th className={styles.tableCell} onClick={() => handleSort('sehir')}>
-                Şehir <SortIcon field="sehir" />
+              <th
+                className={styles.tableCell}
+                onClick={() => handleSort('city')}
+              >
+                Şehir <SortIcon field='city' />
               </th>
-              <th className={styles.tableCell} onClick={() => handleSort('yetkili')}>
-                Yetkili <SortIcon field="yetkili" />
+              <th
+                className={styles.tableCell}
+                onClick={() => handleSort('firstName')}
+              >
+                Yetkili <SortIcon field='firstName' />
               </th>
-              <th className={styles.tableCell} onClick={() => handleSort('borc')}>
-                Borç <SortIcon field="borc" />
+              <th
+                className={styles.tableCell}
+                onClick={() => handleSort('debt')}
+              >
+                Borç <SortIcon field='debt' />
               </th>
-              <th className={styles.tableCell} onClick={() => handleSort('alacak')}>
-                Alacak <SortIcon field="alacak" />
+              <th
+                className={styles.tableCell}
+                onClick={() => handleSort('credit')}
+              >
+                Alacak <SortIcon field='credit' />
               </th>
-              <th className={styles.tableCell} onClick={() => handleSort('bakiyeBorc')}>
-                Bakiye Borç <SortIcon field="bakiyeBorc" />
+              <th
+                className={styles.tableCell}
+                onClick={() => handleSort('balanceDebt')}
+              >
+                Bakiye Borç <SortIcon field='balanceDebt' />
               </th>
-              <th className={styles.tableCell} onClick={() => handleSort('bakiyeAlacak')}>
-                Bakiye Alacak <SortIcon field="bakiyeAlacak" />
+              <th
+                className={styles.tableCell}
+                onClick={() => handleSort('balanceCredit')}
+              >
+                Bakiye Alacak <SortIcon field='balanceCredit' />
               </th>
               <th className={`${styles.tableCell} ${styles.actionsCell}`}>
                 İşlemler
@@ -253,23 +353,44 @@ const YeniCariKart: React.FC = () => {
             {currentCustomers.map((customer) => (
               <tr key={customer.id}>
                 <td className={styles.tableCell}>{customer.id}</td>
-                <td className={styles.tableCell}>{customer.unvan}</td>
-                <td className={styles.tableCell}>{customer.sehir}</td>
-                <td className={styles.tableCell}>{customer.yetkili}</td>
-                <td className={styles.tableCell}>{formatNumber(customer.borc)}</td>
-                <td className={styles.tableCell}>{formatNumber(customer.alacak)}</td>
-                <td className={styles.tableCell}>{formatNumber(customer.bakiyeBorc)}</td>
-                <td className={styles.tableCell}>{formatNumber(customer.bakiyeAlacak)}</td>
-                <td className={`${styles.tableCell} ${styles.actionsCell}`}>
-                  <button className={`${styles.button} ${styles.buttonBlue}`}>
-                    <FaEye /> Göster
-                  </button>
-                  <button className={`${styles.button} ${styles.buttonGreen}`}>
-                    <FaEdit /> Düzelt
-                  </button>
-                  <button className={`${styles.button} ${styles.buttonRed}`}>
-                    <FaTrash /> İptal
-                  </button>
+                <td className={styles.tableCell}>{customer.company}</td>
+                <td className={styles.tableCell}>{customer.city}</td>
+                <td className={styles.tableCell}>{customer.firstName}</td>
+                <td className={styles.tableCell}>
+                  {formatNumber(customer.debt)}
+                </td>
+                <td className={styles.tableCell}>
+                  {formatNumber(customer.credit)}
+                </td>
+                <td className={styles.tableCell}>
+                  {formatNumber(customer.balanceDebt)}
+                </td>
+                <td className={styles.tableCell}>
+                  {formatNumber(customer.balanceCredit)}
+                </td>
+                <td className='text-center'>
+                  <Button
+                    variant='info'
+                    size='sm'
+                    className='me-2'
+                    onClick={() => handleShow(customer, 'view')}
+                  >
+                    <FaEye />
+                  </Button>
+                  <Button
+                    variant='warning'
+                    size='sm'
+                    className='me-2'
+                    onClick={() => handleShow(customer, 'edit')}
+                  >
+                    <FaEdit />
+                  </Button>
+                  <Button
+                    variant='danger'
+                    onClick={() => openDeleteModal(customer)}
+                  >
+                    <FaTrash />
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -294,6 +415,21 @@ const YeniCariKart: React.FC = () => {
           disabledClassName={styles.disabled}
         />
       </div>
+        <ConfirmDeleteModal
+        show={showDeleteModal} // Modalın açılıp açılmadığını kontrol eden props
+        handleClose={() => setShowDeleteModal(false)} // Modalı kapatma fonksiyonu
+        handleConfirm={handleDeleteConfirm} // Silme işlemi onaylandığında tetiklenecek fonksiyon
+      />
+      <ModalForm
+        show={showModal}
+        handleClose={handleClose}
+        formData={currentRecord}
+        mode={modalMode}
+        onFormChange={handleFormChange}
+        onFormSubmit={handleFormSubmit}
+      />
+ 
+      <ToastContainer />
     </div>
   );
 };
