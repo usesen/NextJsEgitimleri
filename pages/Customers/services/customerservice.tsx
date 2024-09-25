@@ -59,7 +59,6 @@ export const handleUpdateData = async (id: string, data: any) => {
 };
 
 // DELETE (Müşteriyi sil)
-// DELETE (Müşteriyi sil)
 export const handleDeleteData = async (id: string): Promise<void> => {
   try {
     await customerApiInstance.delete(`/customer/${id}`);

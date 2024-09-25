@@ -1,8 +1,9 @@
-import React, { createContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode,useContext } from 'react';
 
 // Kullanıcı verisi için bir arayüz tanımlıyoruz
 interface User {
   name: string;
+  email: string; // email alanını ekliyoruz
   token: string;
 }
 
@@ -24,11 +25,10 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null); // Kullanıcı durumu
 
-  const login = (userData: User) => {
-    // userData'nın tipi User olarak tanımlandı
-    setUser(userData);
-    localStorage.setItem('token', userData.token);
-  };
+const login = (userData: User) => {
+  setUser(userData);
+  localStorage.setItem('token', userData.token); // Token'ı localStorage'a kaydet
+};
 
   const logout = () => {
     setUser(null);
@@ -41,3 +41,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+// useAuth hook'unu tanımlıyoruz
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+ 
