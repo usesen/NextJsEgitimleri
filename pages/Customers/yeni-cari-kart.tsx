@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactPaginate from 'react-paginate';
 import styles from '../../styles/YeniCariKart.module.css';
-import { Table, Button, Form, Row, Col, InputGroup, Modal } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ModalForm from './FormData';
 import CariRecord from '../models/CariRecordModel';
@@ -9,6 +8,7 @@ import { getData, handleDeleteData} from './services/customerservice'; // Servis
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Toastify stillerini dahil etmeyi unutma
 import ConfirmDeleteModal from './services/ConfirmDeleteModal';
+import { Button } from 'react-bootstrap';
 
 import {
   FaSearch,
